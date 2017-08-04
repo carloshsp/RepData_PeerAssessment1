@@ -11,16 +11,14 @@ Assignments presented at README.md file in
 <br>
 <br>
 <br>
-```{r echo=FALSE}
-options(scipen = 999, digits = 2)
 
-```
 ## Load Required Libraries
 
 In order to complete this assignment the following libraries 
 are required (supressing messages and warnings to avoid too much noise):
 
-```{r}
+
+```r
 suppressMessages(suppressWarnings(require(data.table)))
 suppressMessages(suppressWarnings(require(tidyverse)))
 suppressMessages(suppressWarnings(require(lubridate)))
@@ -40,7 +38,8 @@ result to a variable called **act**
 4. unlink temp file, remove unused variables from environment
 5. transform variable *date* to class *Date* using lubridate's *ymd*
 
-```{r}
+
+```r
 url <- "https://github.com/carloshsp/RepData_PeerAssessment1/raw/master/activity.zip"
 temp <- tempfile()
 download.file(url, temp)
@@ -59,7 +58,8 @@ act <- act %>% mutate(date = ymd(date))
 First a new variable *acttable* is created by summarizing the sum of steps 
 for each day to a variable called *stepsum*, using *dplyr* chain commands
 
-```{r}
+
+```r
 acttable <- act %>% group_by(date) %>% summarize(stepsum = sum(steps))
 ```
 <br>
@@ -67,7 +67,8 @@ acttable <- act %>% group_by(date) %>% summarize(stepsum = sum(steps))
 Then a histogram plot over *stepsum* is created using *ggplot2* 
 (note that na.rm=T in order to eliminate missing data). 
 
-```{r}
+
+```r
 ggplot(acttable) + 
         geom_histogram(aes(stepsum), bins=6, na.rm = T, 
                        fill = "blue", color = "black") +
@@ -75,17 +76,20 @@ ggplot(acttable) +
         xlab("Total number of Steps") +
         ylab("Frequency")
 ```
+
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png)
 <br>
 
 Mean and median are calculated using the following code:
-```{r}
+
+```r
 meansteps <- mean(acttable$stepsum, na.rm = T)
 mediansteps <- median(acttable$stepsum, na.rm = T)
 ```
 
-**The mean number of steps per day is `r meansteps`**.
+**The mean number of steps per day is 10766.19**.
 
-**The median number of steps per day is `r mediansteps`**
+**The median number of steps per day is 10765**
 
 <br>
 <br>
@@ -96,7 +100,8 @@ mediansteps <- median(acttable$stepsum, na.rm = T)
 First a new variable *actint* is created by summarizing the sum of steps 
 for each interval, using *dplyr* chain commands
 
-```{r}
+
+```r
 actint <- act %>% group_by(interval) %>% 
         summarize(stepmean = mean(steps, na.rm = TRUE))
 ```
@@ -104,23 +109,27 @@ actint <- act %>% group_by(interval) %>%
 
 Then a simple line graph is created using *ggplot2*
 
-```{r}
+
+```r
 ggplot(actint) +
         geom_line(aes(interval, stepmean)) +
         ggtitle("Timeline of Number of Steps per 5-minute interval") +
         ylab("Number of Steps") +
         xlab("5-minute Interval Identifier")
 ```
+
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png)
 <br>
 
 Calculation of the maximum number of steps per interval:
 
-```{r}
+
+```r
 maxsteps <- actint$interval[match(max(actint$stepmean), actint$stepmean)]
 ```
 
-**The maximum number of average steps per interval is `r max(actint$stepmean)`,** 
-**which occurs at interval identifier no. `r maxsteps`.** 
+**The maximum number of average steps per interval is 206.17,** 
+**which occurs at interval identifier no. 835.** 
 
 <br>
 <br>
@@ -130,11 +139,12 @@ maxsteps <- actint$interval[match(max(actint$stepmean), actint$stepmean)]
 
 Calculating number of missing values:
 
-```{r}
+
+```r
 NASteps <- sum(is.na(act$steps))
 ```
 
-**Total number of missing values: `r NASteps`**
+**Total number of missing values: 2304**
 
 <br>
 <br>
@@ -144,7 +154,8 @@ value using the *actint* summary, matching it with the mean value for the same
 interval across all days. The result is assign to a new dataset called 
 **actfill**. 
 
-```{r}
+
+```r
 actfill <- act
 for(i in 1:length(actfill$steps)) {
         if(is.na(actfill$steps[i]) == TRUE) {
@@ -168,7 +179,8 @@ Those are the steps:
 3. Create a histogram using both variables *stepsum* (summarized and created in 
 the previous assignment, still with missing values not filled) and *stepfill*
 
-```{r}
+
+```r
 actfilltable <- actfill %>% group_by(date) %>% summarize(stepsum = sum(steps))
 acttable$stepfill <- actfilltable$stepsum 
 ggplot(acttable) + 
@@ -184,19 +196,22 @@ ggplot(acttable) +
         theme(legend.position = "top") + 
         labs(fill = "NA Management:")
 ```
+
+![plot of chunk unnamed-chunk-12](figure/unnamed-chunk-12-1.png)
 <br>
 
 Calculate new means and medians
-```{r}
+
+```r
 meanfillsteps <- mean(actfilltable$stepsum, na.rm = T)
 medianfillsteps <- median(actfilltable$stepsum, na.rm = T)
 ```
 
 **After filling missing values, means and medians changed as following:**
 
-**MEANS: from `r meansteps` to `r meanfillsteps` -- No change**
+**MEANS: from 10766.19 to 10766.19 -- No change**
 
-**MEDIANS: from `r mediansteps` to `r medianfillsteps` -- raised to mean**
+**MEDIANS: from 10765 to 10766.19 -- raised to mean**
 
 <br>
 <br>
@@ -211,7 +226,8 @@ represented by integers 1 to 7 (sunday to saturday)
 vector *c(2:6)*, or else inserting "weekend".
 3. variable *wday* class is converted to factor
 
-```{r}
+
+```r
 actfill$wday <- wday(actfill$date)
 for(i in 1:length(actfill$date)) {
         actfill$wday[i] <- ifelse(actfill$wday[i] %in% c(2:6), 
@@ -227,7 +243,8 @@ Plotting timeline from averaged intervals between weekdays and weekends
 averaged by weekday and interval.
 2. Plot ggplot graph faceted by *wday*
 
-```{r}
+
+```r
 actwday <- actfill %>% group_by(wday, interval) %>% 
         summarize(stepmean = mean(steps))
 ggplot(actwday) +
@@ -237,3 +254,5 @@ ggplot(actwday) +
         ylab("Number of Steps") +
         xlab("5-minute Interval Identifier")
 ```
+
+![plot of chunk unnamed-chunk-15](figure/unnamed-chunk-15-1.png)
